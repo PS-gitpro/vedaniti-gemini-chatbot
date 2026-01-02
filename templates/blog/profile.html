@@ -1,0 +1,98 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}My Profile - Prateek's Blog{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-prateek text-white">
+                <h3 class="mb-0"><i class="fas fa-user-cog"></i> My Profile</h3>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Avatar Section -->
+                    <div class="text-center mb-4">
+                        {% if user.profile.avatar %}
+                        <img src="{{ user.profile.avatar.url }}" alt="{{ user.username }}" 
+                             class="rounded-circle mb-3" width="120" height="120">
+                        {% else %}
+                        <i class="fas fa-user-circle fa-5x text-prateek mb-3"></i>
+                        {% endif %}
+                        <h4>{{ user.username }}</h4>
+                        <p class="text-muted">Member since {{ user.date_joined|date:"F Y" }}</p>
+                    </div>
+                    
+                    <!-- Form Fields -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Username</label>
+                                <input type="text" class="form-control" value="{{ user.username }}" disabled>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" class="form-control" value="{{ user.email }}" disabled>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% for error in field.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    {% endfor %}
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{% url 'blog:home' %}" class="btn btn-secondary me-md-2">
+                            <i class="fas fa-arrow-left"></i> Back to Home
+                        </a>
+                        <button type="submit" class="btn btn-prateek">
+                            <i class="fas fa-save"></i> Update Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- User Stats -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-prateek">{{ user.post_set.count }}</h3>
+                        <p class="mb-0">Posts Written</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-prateek">{{ user.comment_set.count }}</h3>
+                        <p class="mb-0">Comments Made</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="text-prateek">{{ user.date_joined|timesince }}</h3>
+                        <p class="mb-0">Member For</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

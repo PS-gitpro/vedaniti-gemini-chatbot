@@ -1,0 +1,153 @@
+package com.example.mongodb;
+
+import com.mongodb.client.MongoClient;
+import com.mongodb.client.MongoClients;
+import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.model.Filters;
+import com.mongodb.client.model.Updates;
+import org.bson.Document;
+import org.bson.conversions.Bson;
+import java.util.Scanner;
+
+public class StudentManager {
+    private static MongoCollection<Document> collection;
+    private static Scanner scanner = new Scanner(System.in);
+    
+    public static void main(String[] args) {
+        try {
+            // Connect to MongoDB
+            MongoClient mongoClient = MongoClients.create("mongodb://localhost:27017");
+            MongoDatabase database = mongoClient.getDatabase("studentDB");
+            collection = database.getCollection("students");
+            
+            System.out.println("Connected to MongoDB successfully!");
+            
+            // Show menu
+            showMenu(mongoClient);
+            
+        } catch (Exception e) {
+            System.err.println("Error: " + e.getMessage());
+            System.out.println("Make sure MongoDB is running!");
+        }
+    }
+    
+    private static void showMenu(MongoClient mongoClient) {
+        while (true) {
+            System.out.println("\n=== MONGODB STUDENT MANAGER ===");
+            System.out.println("1. Add Student");
+            System.out.println("2. View All Students");
+            System.out.println("3. Update Student");
+            System.out.println("4. Delete Student");
+            System.out.println("5. Search Student by Roll No");
+            System.out.println("6. Exit");
+            System.out.print("Choose option: ");
+            
+            int choice = scanner.nextInt();
+            scanner.nextLine(); // consume newline
+            
+            switch (choice) {
+                case 1: addStudent(); break;
+                case 2: viewStudents(); break;
+                case 3: updateStudent(); break;
+                case 4: deleteStudent(); break;
+                case 5: searchStudent(); break;
+                case 6: 
+                    System.out.println("Goodbye!");
+                    mongoClient.close();
+                    scanner.close();
+                    return;
+                default: 
+                    System.out.println("Invalid option!");
+            }
+        }
+    }
+    
+    private static void addStudent() {
+        System.out.print("Enter Roll No: ");
+        String rno = scanner.nextLine();
+        System.out.print("Enter Name: ");
+        String name = scanner.nextLine();
+        System.out.print("Enter Age: ");
+        String age = scanner.nextLine();
+        
+        Document student = new Document("rno", rno)
+                .append("name", name)
+                .append("age", age);
+        collection.insertOne(student);
+        System.out.println("Student added successfully!");
+    }
+    
+    private static void viewStudents() {
+        System.out.println("\n--- STUDENT LIST ---");
+        int count = 0;
+        for (Document student : collection.find()) {
+            System.out.println("Roll No: " + student.getString("rno") +
+                    ", Name: " + student.getString("name") +
+                    ", Age: " + student.getString("age"));
+            count++;
+        }
+        if (count == 0) {
+            System.out.println("No students found!");
+        } else {
+            System.out.println("Total students: " + count);
+        }
+    }
+    
+    private static void updateStudent() {
+        System.out.print("Enter student roll no to update: ");
+        String rno = scanner.nextLine();
+        
+        // Check if student exists
+        Bson filter = Filters.eq("rno", rno);
+        Document existing = collection.find(filter).first();
+        
+        if (existing == null) {
+            System.out.println("Student with roll no " + rno + " not found!");
+            return;
+        }
+        
+        System.out.print("Enter new name: ");
+        String newName = scanner.nextLine();
+        System.out.print("Enter new age: ");
+        String newAge = scanner.nextLine();
+        
+        Bson updateName = Updates.set("name", newName);
+        Bson updateAge = Updates.set("age", newAge);
+        
+        collection.updateOne(filter, updateName);
+        collection.updateOne(filter, updateAge);
+        System.out.println("Student updated successfully!");
+    }
+    
+    private static void deleteStudent() {
+        System.out.print("Enter student roll no to delete: ");
+        String rno = scanner.nextLine();
+        
+        Bson filter = Filters.eq("rno", rno);
+        long deletedCount = collection.deleteOne(filter).getDeletedCount();
+        
+        if (deletedCount > 0) {
+            System.out.println("Student deleted successfully!");
+        } else {
+            System.out.println("Student with roll no " + rno + " not found!");
+        }
+    }
+    
+    private static void searchStudent() {
+        System.out.print("Enter roll no to search: ");
+        String rno = scanner.nextLine();
+        
+        Bson filter = Filters.eq("rno", rno);
+        Document student = collection.find(filter).first();
+        
+        if (student != null) {
+            System.out.println("\nStudent Found:");
+            System.out.println("Roll No: " + student.getString("rno"));
+            System.out.println("Name: " + student.getString("name"));
+            System.out.println("Age: " + student.getString("age"));
+        } else {
+            System.out.println("Student with roll no " + rno + " not found!");
+        }
+    }
+}

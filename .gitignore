@@ -1,3 +1,23 @@
+<<<<<<< HEAD
 .env
 __pycache__/
 *.pyc
+=======
+# Django
+__pycache__/
+*.pyc
+*.sqlite3
+db.sqlite3
+.env
+*.log
+.DS_Store
+staticfiles/
+migrations/__pycache__/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+>>>>>>> d42ae75bf4ee0c74fb7bd30c62f71c041f84c435

@@ -1,0 +1,104 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}About Prateek - Prateek's Blog{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Hero Section -->
+        <div class="text-center mb-5">
+            <div class="mb-4">
+                <i class="fas fa-user-circle fa-5x text-prateek"></i>
+            </div>
+            <h1 class="display-4 text-prateek">Hello, I'm Prateek! 👋</h1>
+            <p class="lead">Welcome to my corner of the internet</p>
+        </div>
+
+        <!-- About Content -->
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title border-bottom pb-3">My Story</h3>
+                        
+                        <p>Welcome to my personal blog! I'm passionate about technology, programming, and sharing knowledge with the community. This platform is where I document my journey, share insights, and connect with like-minded individuals.</p>
+                        
+                        <h5><i class="fas fa-code text-prateek"></i> What I Do</h5>
+                        <ul>
+                            <li>Web Development with Django & Python</li>
+                            <li>Programming tutorials and guides</li>
+                            <li>Technology insights and reviews</li>
+                            <li>Personal growth and learning experiences</li>
+                        </ul>
+                        
+                        <h5><i class="fas fa-rocket text-prateek"></i> My Mission</h5>
+                        <p>To create a space where knowledge is shared freely, ideas are discussed openly, and everyone feels welcome to learn and grow together.</p>
+                        
+                        <h5><i class="fas fa-heart text-prateek"></i> Why This Blog?</h5>
+                        <p>I believe in the power of sharing knowledge. Whether you're a beginner starting your coding journey or an experienced developer looking for new perspectives, there's something here for everyone.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <!-- Quick Facts -->
+                <div class="card mb-4">
+                    <div class="card-header bg-prateek text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle"></i> Quick Facts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <strong><i class="fas fa-laptop-code text-prateek"></i> Expertise</strong>
+                            <p class="mb-1">Python, Django, Web Development</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong><i class="fas fa-graduation-cap text-prateek"></i> Focus</strong>
+                            <p class="mb-1">Teaching & Knowledge Sharing</p>
+                        </div>
+                        <div class="mb-3">
+                            <strong><i class="fas fa-users text-prateek"></i> Community</strong>
+                            <p class="mb-1">Building Learning Communities</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Connect -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-share-alt"></i> Let's Connect</h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <p>Feel free to reach out or join our community!</p>
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'blog:register' %}" class="btn btn-prateek">
+                                <i class="fas fa-user-plus"></i> Join Blog
+                            </a>
+                            <a href="{% url 'blog:post_list' %}" class="btn btn-outline-prateek">
+                                <i class="fas fa-blog"></i> Read Posts
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="card mt-4 bg-light">
+            <div class="card-body text-center py-5">
+                <h3 class="text-prateek">Ready to Join the Journey?</h3>
+                <p class="mb-3">Become part of our growing community of learners and creators.</p>
+                <div class="d-flex justify-content-center gap-3">
+                    {% if not user.is_authenticated %}
+                    <a href="{% url 'blog:register' %}" class="btn btn-prateek btn-lg">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </a>
+                    {% endif %}
+                    <a href="{% url 'blog:post_list' %}" class="btn btn-outline-prateek btn-lg">
+                        <i class="fas fa-book-reader"></i> Explore Content
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
