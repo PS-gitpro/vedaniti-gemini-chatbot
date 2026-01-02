@@ -1,97 +1,91 @@
 import os
 import streamlit as st
-from dotenv import load_dotenv
 import google.generativeai as genai
+import requests
+from bs4 import BeautifulSoup
 
-load_dotenv()
+# ✅ Hybrid: .env local + st.secrets cloud (secure)
 api_key = os.getenv("GOOGLE_API_KEY")
-
-# ✅ Try Streamlit secrets as fallback for cloud deployment
 if not api_key and hasattr(st, 'secrets'):
     api_key = st.secrets.get("GOOGLE_API_KEY")
 
 with st.sidebar:
     st.title("🔧 Debug Panel")
     if api_key:
-        st.success("✅ API Key loaded successfully!")
-        st.caption(f"Key: {api_key[:10]}...{api_key[-5:]}" if len(api_key) > 15 else "Key loaded")
+        st.success("✅ API Key loaded!")
+        st.caption(f"Key: {api_key[:10]}...{api_key[-5:]}")
     else:
-        st.error("⚠️ API Key not found")
-        st.info("Add GOOGLE_API_KEY to .env file or Streamlit secrets")
-
-if not api_key:
-    st.error("🚨 API Key Required: Add GOOGLE_API_KEY to .env or Streamlit secrets")
-    st.info("Get your key from: https://makersuite.google.com/app/apikey")
-    st.stop()
+        st.error("⚠️ API Key missing")
+        st.stop()
 
 genai.configure(api_key=api_key)
+model = genai.GenerativeModel('gemini-2.5-flash')
 
-# ✅ Use current stable model (2026)
-model = genai.GenerativeModel('gemini-2.5-flash')  # Fast, accessible, 1M context
+# 🌐 Vedaniti website context (RAG)
+VEDANITI_CONTEXT = """
+Vedaniti Technologies: Empowering businesses with cutting-edge technology.
+Services: Custom software development (scalable, secure apps), Websites (stunning UI/UX), 
+Mobile apps (iOS/Android), Edtech platforms, AI solutions.
+Mission: Transform ideas into digital solutions. Projects delivered, happy clients.
+Website: vedaniti.com
+"""
 
-# Updated system prompt for "Ask me" branding
-model.system_instruction = """You are 'Ask Me' - a helpful AI assistant designed to answer questions clearly and concisely. 
-Provide accurate, informative responses. Be friendly but professional. If you don't know something, admit it honestly."""
+def get_website_context(query):
+    """Fetch vedaniti.com if query mentions Vedaniti/services"""
+    if any(word in query.lower() for word in ['vedaniti', 'services', 'service', 'website', 'app', 'software']):
+        try:
+            response = requests.get("https://vedaniti.com", timeout=5)
+            soup = BeautifulSoup(response.text, 'html.parser')
+            # Extract key sections (customize selectors)
+            services = soup.find_all(['p', 'h2', 'h3'], string=lambda t: t and 'services' in t.lower())
+            context = ' '.join([s.get_text() for s in services[:3]])[:2000]
+            return f"Vedaniti website: {context}"
+        except:
+            return VEDANITI_CONTEXT
+    return VEDANITI_CONTEXT
 
-# Initialize chat history
+# Vedaniti-aware system prompt
+model.system_instruction = f"""You are 'Ask Me' - Vedaniti's AI assistant.
+Vedaniti context: {VEDANITI_CONTEXT}
+
+Answer ALL queries using Vedaniti knowledge when relevant. Be helpful, professional.
+For Vedaniti questions: Use website context + services info."""
+
 if "messages" not in st.session_state:
-    st.session_state.messages = [{"role": "assistant", "content": "Hello! I'm Ask Me 🤖 How can I help you today?"}]
+    st.session_state.messages = [{"role": "assistant", "content": "Hello! I'm Ask Me 🤖 Vedaniti's AI assistant. Ask about our services, apps, or anything!"}]
 
-# Main UI
 st.title("🤖 Ask Me AI Assistant")
-st.caption("Powered by Google Gemini 2.5 | Ask me anything!")
+st.caption("Powered by Google Gemini 2.5 | Vedaniti-aware")
 
-# Display chat messages
 for msg in st.session_state.messages:
     with st.chat_message(msg["role"]):
         st.markdown(msg["content"])
 
-# Chat input
-if prompt := st.chat_input("Type your question here..."):
-    # Add user message to history
+if prompt := st.chat_input("Ask about Vedaniti services?"):
     st.session_state.messages.append({"role": "user", "content": prompt})
-    
-    # Display user message
     with st.chat_message("user"):
         st.markdown(prompt)
     
-    # Generate and display assistant response
     with st.chat_message("assistant"):
         with st.spinner("Thinking..."):
             try:
-                response = model.generate_content(prompt)
+                # RAG: Add website context
+                context = get_website_context(prompt)
+                full_prompt = f"Vedaniti context: {context}\n\nUser: {prompt}"
+                
+                response = model.generate_content(full_prompt)
                 st.markdown(response.text)
-                # Add assistant response to history
                 st.session_state.messages.append({"role": "assistant", "content": response.text})
             except Exception as e:
-                error_msg = f"Sorry, I encountered an error: {str(e)}"
-                st.error(error_msg)
-                st.session_state.messages.append({"role": "assistant", "content": error_msg})
+                st.error(f"Error: {str(e)}")
+                st.session_state.messages.append({"role": "assistant", "content": "Sorry, try again!"})
 
-# Sidebar controls
+# Sidebar
 with st.sidebar:
     st.divider()
-    st.subheader("Chat Controls")
-    
-    if st.button("🧹 Clear Chat History", use_container_width=True):
-        st.session_state.messages = [{"role": "assistant", "content": "Chat cleared! I'm ready for your questions. 😊"}]
+    if st.button("🧹 Clear Chat"):
+        st.session_state.messages = [{"role": "assistant", "content": "Cleared! Ask about Vedaniti? 😊"}]
         st.rerun()
     
-    st.divider()
-    st.subheader("ℹ️ About")
-    st.markdown("""
-    **Ask Me AI Assistant**
-    
-    Powered by Google's Gemini 2.5 Flash model.
-    
-    Features:
-    - Real-time conversations
-    - Fast responses
-    - Context-aware replies
-    
-    Built with Streamlit + Gemini API
-    """)
-    
-    # Show message count
-    st.divider()
     st.metric("Messages", len(st.session_state.messages))
+    st.caption("✅ Vedaniti RAG enabled")
