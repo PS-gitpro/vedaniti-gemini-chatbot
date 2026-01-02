@@ -1,6 +1,6 @@
 import os
 import streamlit as st
-import google.genai as genai  # Updated import
+import google.generativeai as genai  # CORRECT IMPORT
 import requests
 from bs4 import BeautifulSoup
 
@@ -18,16 +18,8 @@ with st.sidebar:
         st.error("⚠️ API Key missing")
         st.stop()
 
-# Configure with new API
 genai.configure(api_key=api_key)
-
-# Create model with new syntax
-model = genai.GenerativeModel(
-    model_name="gemini-2.5-flash",
-    system_instruction="""You are 'Ask Me' - Vedaniti's AI assistant.
-Answer ALL queries using Vedaniti knowledge when relevant. Be helpful, professional.
-For Vedaniti questions: Use website context + services info."""
-)
+model = genai.GenerativeModel('gemini-2.5-flash')
 
 # 🌐 Vedaniti website context (RAG)
 VEDANITI_CONTEXT = """
@@ -51,6 +43,13 @@ def get_website_context(query):
         except:
             return VEDANITI_CONTEXT
     return VEDANITI_CONTEXT
+
+# Vedaniti-aware system prompt
+model.system_instruction = f"""You are 'Ask Me' - Vedaniti's AI assistant.
+Vedaniti context: {VEDANITI_CONTEXT}
+
+Answer ALL queries using Vedaniti knowledge when relevant. Be helpful, professional.
+For Vedaniti questions: Use website context + services info."""
 
 if "messages" not in st.session_state:
     st.session_state.messages = [{"role": "assistant", "content": "Hello! I'm Ask Me 🤖 Vedaniti's AI assistant. Ask about our services, apps, or anything!"}]
