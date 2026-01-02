@@ -1,0 +1,14 @@
+<<<<<<< HEAD
+streamlit==1.38.0
+google-generativeai==0.8.3
+flask==3.0.3
+python-dotenv==1.0.1
+=======
+Django==5.2.6
+gunicorn
+whitenoise
+dj-database-url
+psycopg2-binary
+django-ckeditor
+Pillow
+>>>>>>> d42ae75bf4ee0c74fb7bd30c62f71c041f84c435
