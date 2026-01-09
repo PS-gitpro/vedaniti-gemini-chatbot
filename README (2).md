@@ -1,21 +1,21 @@
 ---
-title: Vedaniti Gemini Chatbot
+title: Vedaniti Chatbot
 emoji: 🤖
 colorFrom: indigo
 colorTo: yellow
 sdk: streamlit
-sdk_version: 1.38.0
+sdk_version: 1.52.2
 app_file: app.py
 pinned: false
 ---
 
 # 🤖 Ask Me - Vedaniti AI Assistant
 
-A production-ready AI chatbot powered by **Google Gemini 2.0 Flash**, built for Vedaniti Technologies to answer customer inquiries about software development services.
+A production-ready AI chatbot powered by **Groq LLaMA 3.3 70B**, built for Vedaniti Technologies to answer customer inquiries about software development services.
 
 ## Features
 
-✨ **Intelligent Responses** - Powered by Gemini 2.0 Flash LLM
+✨ **Intelligent Responses** - Powered by Groq LLaMA 3.3 70B
 ⚡ **Fast & Reliable** - Exponential backoff retry logic (3 attempts)
 🎯 **Contextual Answers** - Knowledge base about Vedaniti services
 🔒 **Secure** - API keys stored in HF Space secrets
@@ -26,7 +26,7 @@ A production-ready AI chatbot powered by **Google Gemini 2.0 Flash**, built for 
 
 ### Prerequisites
 - Python 3.10+
-- Google API Key (Gemini 2.0 Flash)
+- Groq API Key
 - Hugging Face Space (or local deployment)
 
 ### Installation
@@ -40,7 +40,7 @@ cd vedaniti-gemini-chatbot
 pip install -r requirements.txt
 
 # Create .env file
-echo "GOOGLE_API_KEY=your_api_key_here" > .env
+echo "GROQ_API_KEY=your_api_key_here" > .env
 
 # Run app
 streamlit run app.py
